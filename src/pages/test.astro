@@ -1,0 +1,29 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import GalaxyCanvas from "../components/galaxy/GalaxyCanvas";
+---
+
+<html lang="zh-CN">
+    <head>
+        <BaseHead
+            title="星系博客测试"
+            description="基于Three.js的星系博客首页"
+        />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+            #canvas-container {
+                width: 100vw;
+                height: 100vh;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="canvas-container">
+            <GalaxyCanvas client:load />
+        </div>
+    </body>
+</html>
