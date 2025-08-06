@@ -3,20 +3,7 @@ import * as INPUT from '../../../../shaders/input';
 import * as TRANSFORMER from '../../../../shaders/transformer';
 import { camera } from '../../camera';
 
-const createSunMaterial = () => {
-  return new THREE.MeshStandardMaterial({
-    color: '#ffd700',
-    emissive: '#ffd700',
-    emissiveIntensity: 0.3,
-    metalness: 0.1,
-    roughness: 0.8
-  });
-};
-
-export default createSunMaterial;
-
-// 自发光材质
-const emissionMaterial = new THREE.ShaderMaterial({
+const material = new THREE.ShaderMaterial({
     vertexShader: `
         varying vec3 vPosition;
         varying vec3 vNormal;
@@ -28,28 +15,32 @@ const emissionMaterial = new THREE.ShaderMaterial({
         }
     `,
     fragmentShader: `
-        uniform float time;
-        uniform vec3 emissionColor;
-        uniform float emissionIntensity;
+        uniform vec3 cameraPos;
 
         varying vec3 vPosition;
         varying vec3 vNormal;
 
-        ${INPUT.LayerWeight()};
-        ${TRANSFORMER.ColourRamp()};
+        ${INPUT.LayerWeight()}
+        ${TRANSFORMER.ColourRamp()}
 
         void main() {
-        vec3 normal = normalize(vNormal);
-        vec3 viewDir = normalize(cameraPos - vPosition);
+            vec3 normal = normalize(vNormal);
+            vec3 viewDir = normalize(cameraPos - vPosition);
 
-        float fresnelWeight = fresnel(viweDir, normal, 0.035);
-        vec3 colour = colorRamp(fresnelWeight, 0, 1);
+            float fresnelWeight = fresnel(viewDir, normal, 0.035);
+            vec3 colour = colourRamp(fresnelWeight, 0.0, 1.0, vec3(0.0, 0.0, 0.0),
+                           vec3(1.0, 1.0, 1.0));
+
+            gl_FragColor = vec4(colour, 1.0);
         }
     `,
     uniforms: {
-      time: { value: 0 },
-      emissionColor: { value: new THREE.Color(0xffd700) },
-      emissionIntensity: { value: 2.0 },
       cameraPos: {value: new THREE.Vector3(...camera.position)},
     }
-  });
+});
+
+const createSunMaterial = () => {
+    return material; 
+};
+
+export default createSunMaterial;

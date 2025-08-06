@@ -13,6 +13,7 @@ const Sun = () => {
   const sunHaloModel = useGLTF('/src/components/galaxy/stars/sun/sunHalo.glb')
 
   const sunMat = createSunMaterial();
+  const rotationPeriod = 3; // min
 
   // 应用材质到模型
   useEffect(() => {
@@ -26,14 +27,17 @@ const Sun = () => {
   }, [sunModel, sunMat]);
 
   useFrame((state) => {
+    const elapsedTime = state.clock.elapsedTime;
+    const rotationAngle = (elapsedTime / (rotationPeriod * 60)) * 2 * Math.PI;
+
     // 太阳核心旋转
     if (sunCoreRef.current) {
-      sunCoreRef.current.rotation.y += 0.01 // 调整速度
+      sunCoreRef.current.rotation.y = rotationAngle // 调整速度
     }
 
     // 太阳光环旋转
     if (sunHaloRef.current) {
-      sunHaloRef.current.rotation.y += 0.005 // 光环转得慢一些
+      sunHaloRef.current.rotation.y = (rotationAngle / 2) // 光环转得慢一些
     }
   })
 
