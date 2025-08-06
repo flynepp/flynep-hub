@@ -9,4 +9,8 @@ import react from '@astrojs/react';
 export default defineConfig({
     site: 'https://example.com',
     integrations: [mdx(), sitemap(), react()],
+    server: {
+        host: '0.0.0.0',
+        port: 4321,
+    },
 });
