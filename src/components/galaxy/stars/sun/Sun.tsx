@@ -3,17 +3,17 @@ import { useFrame } from '@react-three/fiber'
 import { useRef, useEffect } from 'react'
 import * as THREE from 'three'
 import createSunMaterial from './sunMaterial.tsx'
+import * as sunData from './sunData.ts';
 
 const Sun = () => {
-  const sunRootRef = useRef<THREE.Group>(null)
-  const sunCoreRef = useRef<THREE.Group>(null)
-  const sunHaloRef = useRef<THREE.Group>(null)
+  const sunRootRef = useRef<THREE.Group>(null);
+  const sunCoreRef = useRef<THREE.Group>(null);
+  const sunHaloRef = useRef<THREE.Group>(null);
 
-  const sunModel = useGLTF('/src/components/galaxy/stars/sun/sun.glb')
-  const sunHaloModel = useGLTF('/src/components/galaxy/stars/sun/sunHalo.glb')
+  const sunModel = sunData.sunModel;
+  const sunHaloModel = sunData.sunHaloModel;
 
   const sunMat = createSunMaterial();
-  const rotationPeriod = 3; // min
 
   // 应用材质到模型
   useEffect(() => {
@@ -24,27 +24,28 @@ const Sun = () => {
         }
       });
     }
+
   }, [sunModel, sunMat]);
 
   useFrame((state) => {
     const elapsedTime = state.clock.elapsedTime;
-    const rotationAngle = (elapsedTime / (rotationPeriod * 60)) * 2 * Math.PI;
+    const rotationAngle = (elapsedTime / (sunData.rotationPeriod * 60)) * 2 * Math.PI;
 
     // 太阳核心旋转
     if (sunCoreRef.current) {
-      sunCoreRef.current.rotation.y = rotationAngle // 调整速度
+      sunCoreRef.current.rotation.y = rotationAngle; // 调整速度
     }
 
     // 太阳光环旋转
     if (sunHaloRef.current) {
-      sunHaloRef.current.rotation.y = (rotationAngle / 2) // 光环转得慢一些
+      sunHaloRef.current.rotation.y = (rotationAngle / 2); // 光环转得慢一些
     }
   })
 
   return (
     <group ref={sunRootRef} position={[0, 0, 0]}>
       {/* 太阳核心 */}
-      <group  ref={sunCoreRef} position={[0, 0, 0]}>
+      <group ref={sunCoreRef} position={[0, 0, 0]}>
         <primitive object={sunModel.scene} />
       </group>
 
@@ -53,7 +54,7 @@ const Sun = () => {
         <primitive object={sunHaloModel.scene} />
       </group>
     </group>
-  )
+  );
 }
 
 export default Sun

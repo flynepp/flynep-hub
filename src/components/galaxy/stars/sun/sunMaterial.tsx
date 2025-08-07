@@ -1,7 +1,37 @@
 import * as THREE from 'three';
-import * as INPUT from '../../../../shaders/input';
-import * as TRANSFORMER from '../../../../shaders/transformer';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { camera } from '../../camera';
+import shaderCode from './fragmentShader.glsl?raw';
+
+let sunMeshes = [];
+let bboxMin = new THREE.Vector3();
+let bboxSize = new THREE.Vector3();
+
+const loader = new GLTFLoader();
+
+loader.load('/galaxy/stars/sun/sun.glb', (gltf) => {
+    sunMeshes = [];
+
+    gltf.scene.traverse((child) => {
+        if (child.isMesh) {
+            sunMeshes.push(child);
+        }
+    });
+
+    // 计算包围盒
+    const box = new THREE.Box3();
+    sunMeshes.forEach(mesh => {
+        mesh.geometry.computeBoundingBox();
+        box.expandByPoint(mesh.geometry.boundingBox.min);
+        box.expandByPoint(mesh.geometry.boundingBox.max);
+    });
+
+    bboxMin.copy(box.min);
+    bboxSize.copy(box.getSize(new THREE.Vector3()));
+
+    material.uniforms.bboxMin.value.copy(bboxMin);
+    material.uniforms.bboxSize.value.copy(bboxSize);
+});
 
 const material = new THREE.ShaderMaterial({
     vertexShader: `
@@ -14,33 +44,16 @@ const material = new THREE.ShaderMaterial({
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
     `,
-    fragmentShader: `
-        uniform vec3 cameraPos;
-
-        varying vec3 vPosition;
-        varying vec3 vNormal;
-
-        ${INPUT.LayerWeight()}
-        ${TRANSFORMER.ColourRamp()}
-
-        void main() {
-            vec3 normal = normalize(vNormal);
-            vec3 viewDir = normalize(cameraPos - vPosition);
-
-            float fresnelWeight = fresnel(viewDir, normal, 0.035);
-            vec3 colour = colourRamp(fresnelWeight, 0.0, 1.0, vec3(0.0, 0.0, 0.0),
-                           vec3(1.0, 1.0, 1.0));
-
-            gl_FragColor = vec4(colour, 1.0);
-        }
-    `,
+    fragmentShader: shaderCode,
     uniforms: {
-      cameraPos: {value: new THREE.Vector3(...camera.position)},
+        cameraPos: { value: new THREE.Vector3(...camera.position) },
+        bboxMin: { value: new THREE.Vector3() },
+        bboxSize: { value: new THREE.Vector3() },
     }
 });
 
 const createSunMaterial = () => {
-    return material; 
+    return material;
 };
 
 export default createSunMaterial;
