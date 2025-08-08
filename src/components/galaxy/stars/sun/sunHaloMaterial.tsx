@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import shaderCode from './sunFragmentShader.glsl?raw';
+import shaderCode from './sunHaloFragmentShader.glsl?raw';
 
-export function createSunMaterial({ cameraPos, bboxMin, bboxSize, w }) {
+export function createSunHaloMaterial({ cameraPos, bboxMin, bboxSize, w }) {
     return new THREE.ShaderMaterial({
         vertexShader: `
         // 顶点着色器
@@ -28,6 +28,9 @@ export function createSunMaterial({ cameraPos, bboxMin, bboxSize, w }) {
             bboxMin: { value: bboxMin || new THREE.Vector3() },
             bboxSize: { value: bboxSize || new THREE.Vector3() },
             w: { value: w || 0.0 },
-        }
+        },
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.NormalBlending,
     });
 }
