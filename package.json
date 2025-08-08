@@ -9,10 +9,12 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.6.3",
     "@astrojs/mdx": "^4.3.3",
     "@astrojs/react": "^4.3.0",
     "@astrojs/rss": "^4.0.12",
     "@astrojs/sitemap": "^3.4.2",
+    "@react-three/drei": "^10.6.1",
     "@react-three/fiber": "^9.3.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
@@ -21,5 +23,8 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "three": "^0.176.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.28.1"
   }
 }
