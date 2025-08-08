@@ -37,7 +37,7 @@ export default function Sun() {
 
   // 在useFrame中更新uniform动态数据
   useFrame(({ clock, camera }) => {
-    sunMat.uniforms.w.value = clock.getElapsedTime();
+    sunMat.uniforms.w.value = clock.getElapsedTime() * 0.01;
     sunMat.uniforms.cameraPos.value.copy(camera.position);
 
     // 旋转

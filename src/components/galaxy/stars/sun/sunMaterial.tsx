@@ -7,6 +7,7 @@ export function createSunMaterial({ cameraPos, bboxMin, bboxSize, w }) {
         // 顶点着色器
         varying vec3 vNormal;
         varying vec3 vWorldPos;
+        varying vec3 vLocalPos;
 
         void main() {
             // 世界空间法线
@@ -15,6 +16,7 @@ export function createSunMaterial({ cameraPos, bboxMin, bboxSize, w }) {
             // 世界空间位置
             vec4 worldPosition = modelMatrix * vec4(position, 1.0);
             vWorldPos = worldPosition.xyz;
+            vLocalPos = position; 
 
             // 投影变换
             gl_Position = projectionMatrix * viewMatrix * worldPosition;
