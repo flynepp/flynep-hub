@@ -1,60 +1,75 @@
-import { useGLTF } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
-import { useRef, useEffect } from 'react'
-import * as THREE from 'three'
-import createSunMaterial from './sunMaterial.tsx'
-import * as sunData from './sunData.ts';
+import { useGLTF } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import * as THREE from 'three';
+import { sunGLBPath, sunHaloGLBPath, rotationPeriod } from './sunData';
+import { calcBoundingBox } from '../../../helper/helperFunction';
+import { createSunMaterial } from './sunMaterial';
 
-const Sun = () => {
-  const sunRootRef = useRef<THREE.Group>(null);
-  const sunCoreRef = useRef<THREE.Group>(null);
-  const sunHaloRef = useRef<THREE.Group>(null);
+export default function Sun() {
+  const sunModel = useGLTF(sunGLBPath);
+  const sunHaloModel = useGLTF(sunHaloGLBPath);
 
-  const sunModel = sunData.sunModel;
-  const sunHaloModel = sunData.sunHaloModel;
+  const [bboxMin, setBboxMin] = useState(new THREE.Vector3());
+  const [bboxSize, setBboxSize] = useState(new THREE.Vector3());
 
-  const sunMat = createSunMaterial();
+  const sunCoreRef = useRef();
+  const sunHaloRef = useRef();
 
-  // 应用材质到模型
+  // 计算包围盒
+  useEffect(() => {
+    if (sunModel.scene) {
+      const { bboxMin, bboxSize } = calcBoundingBox(sunModel);
+      setBboxMin(bboxMin);
+      setBboxSize(bboxSize);
+    }
+  }, [sunModel]);
+
+  // 创建材质，每当bbox或cameraPos更新时重新创建
+  const sunMat = useMemo(() => {
+    return createSunMaterial({
+      cameraPos: new THREE.Vector3(), // 先给空，后面用useFrame更新
+      bboxMin,
+      bboxSize,
+      w: 0,
+    });
+  }, [bboxMin, bboxSize]);
+
+  // 在useFrame中更新uniform动态数据
+  useFrame(({ clock, camera }) => {
+    sunMat.uniforms.w.value = clock.getElapsedTime();
+    sunMat.uniforms.cameraPos.value.copy(camera.position);
+
+    // 旋转
+    if (sunCoreRef.current) {
+      const rotationAngle = (clock.getElapsedTime() / (rotationPeriod * 60)) * 2 * Math.PI;
+      sunCoreRef.current.rotation.y = rotationAngle;
+    }
+    if (sunHaloRef.current) {
+      const rotationAngle = (clock.getElapsedTime() / (rotationPeriod * 60)) * 2 * Math.PI;
+      sunHaloRef.current.rotation.y = rotationAngle / 2;
+    }
+  });
+
+  // 绑定材质
   useEffect(() => {
     if (sunModel.scene) {
       sunModel.scene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
+        if (child.isMesh) {
           child.material = sunMat;
         }
       });
     }
-
   }, [sunModel, sunMat]);
 
-  useFrame((state) => {
-    const elapsedTime = state.clock.elapsedTime;
-    const rotationAngle = (elapsedTime / (sunData.rotationPeriod * 60)) * 2 * Math.PI;
-
-    // 太阳核心旋转
-    if (sunCoreRef.current) {
-      sunCoreRef.current.rotation.y = rotationAngle; // 调整速度
-    }
-
-    // 太阳光环旋转
-    if (sunHaloRef.current) {
-      sunHaloRef.current.rotation.y = (rotationAngle / 2); // 光环转得慢一些
-    }
-  })
-
   return (
-    <group ref={sunRootRef} position={[0, 0, 0]}>
-      {/* 太阳核心 */}
-      <group ref={sunCoreRef} position={[0, 0, 0]}>
+    <group>
+      <group ref={sunCoreRef}>
         <primitive object={sunModel.scene} />
       </group>
-
-      {/* 太阳光环 */}
-      <group ref={sunHaloRef} position={[0, 0, 0]}>
+      <group ref={sunHaloRef}>
         <primitive object={sunHaloModel.scene} />
       </group>
     </group>
   );
 }
-
-export default Sun

@@ -12,7 +12,7 @@ const FlickerAnimation: React.FC = () => {
   useFrame((state) => {
     updateParticleFlicker(state.clock.elapsedTime);
   });
-  
+
   return null;
 };
 
@@ -38,10 +38,10 @@ const GalaxyCanvas: React.FC = () => {
 
       {/* 闪烁动画 */}
       <FlickerAnimation />
-      
+
       {/* 星空背景 */}
       <primitive object={particles} />
-      
+
       <axesHelper args={[20]} />
       <Text position={[6, 1, 0]} fontSize={0.5} color="red">X</Text>
       <Text position={[1, 6, 0]} fontSize={0.5} color="green">Y</Text>

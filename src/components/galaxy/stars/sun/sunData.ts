@@ -1,11 +1,9 @@
-import { useGLTF } from '@react-three/drei'
-
-const sunModel = useGLTF('/galaxy/stars/sun/sun.glb');
-const sunHaloModel = useGLTF('/galaxy/stars/sun/sunHalo.glb');
-const rotationPeriod = 0.5; // mins
+const sunGLBPath = '/galaxy/stars/sun/sun.glb';
+const sunHaloGLBPath = '/galaxy/stars/sun/sunHalo.glb';
+const rotationPeriod = 0.5;
 
 export {
-    sunModel,
-    sunHaloModel,
+    sunGLBPath,
+    sunHaloGLBPath,
     rotationPeriod
 };
