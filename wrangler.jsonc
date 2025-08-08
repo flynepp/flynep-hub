@@ -1,6 +1,6 @@
 {
     "$schema": "node_modules/wrangler/config-schema.json",
-    "name": "my-astro-app",
+    "name": "flynep-hub",
     "compatibility_date": "2025-08-08",
     "assets": {
       "directory": "./dist",
