@@ -225,7 +225,7 @@ void main() {
   vec3 viewDir = normalize(cameraPos - vWorldPos);
   vec3 normal = normalize(vNormal);
 
-  vec3 baseColour = vec3(0.7, 0.38, 0.04);
+  vec3 baseColour = vec3(0.8, 0.38, 0.24);
 
   float fresnel = fresnel(viewDir, normal, 3.0);
   vec3 colour = colourRamp(fresnel, 0.0, 1.0);
@@ -238,7 +238,7 @@ void main() {
 
   // 第1种纹理
   float factor1 = noiseTextureFBM(mappingVector, w, 2.5, 10.0, 0.85, 2.0, 0.26);
-  vec3 colour1 = colourRamp(factor1, 0.523, 0.773);
+  vec3 colour1 = colourRamp(factor1, 0.493, 0.773);
 
   // 第2种纹理
   float factor2 = noiseTextureFBM(mappingVector, w, 10.0, 30.0, 0.5, 2.0, 0.06);
@@ -246,12 +246,13 @@ void main() {
 
   // 第3种纹理
   float factor3 = noiseTextureFBM(mappingVector, 0.0, 70.0, 2.0, 0.5, 2.0, 0.0);
-  vec3 colour3 = colourRamp(factor3, 0.4, 1.0);
+  vec3 colour3 =
+      colourRamp(factor3, 0.4, 1.0, vec3(0.1, 0.1, 0.1), vec3(1.0, 1.0, 1.0));
 
   vec3 colourMixed = addColors(colour2, colour3, 1.0);
 
   vec3 colourRes = result1 + colour1 + colourMixed;
-  colourRes *= 5.0;
+  colourRes *= 4.0;
 
   vec3 emission = emissive(baseColour, colourRes);
 

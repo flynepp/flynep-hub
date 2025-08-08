@@ -5,12 +5,17 @@ import sitemap from '@astrojs/sitemap';
 
 import react from '@astrojs/react';
 
+import cloudflare from '@astrojs/cloudflare';
+
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://example.com',
-    integrations: [mdx(), sitemap(), react()],
-    server: {
-        host: '0.0.0.0',
-        port: 4321,
-    },
+  site: 'https://example.com',
+  integrations: [mdx(), sitemap(), react()],
+
+  server: {
+      host: '0.0.0.0',
+      port: 4321,
+  },
+
+  adapter: cloudflare(),
 });
