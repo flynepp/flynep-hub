@@ -4,13 +4,20 @@ import shaderCode from './fragmentShader.glsl?raw';
 export function createSunMaterial({ cameraPos, bboxMin, bboxSize, w }) {
     return new THREE.ShaderMaterial({
         vertexShader: `
-        varying vec3 vPosition;
+        // 顶点着色器
         varying vec3 vNormal;
+        varying vec3 vWorldPos;
 
         void main() {
-            vPosition = position;
-            vNormal = normalize(normalMatrix * normal);
-            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            // 世界空间法线
+            vNormal = normalize(mat3(modelMatrix) * normal);
+
+            // 世界空间位置
+            vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+            vWorldPos = worldPosition.xyz;
+
+            // 投影变换
+            gl_Position = projectionMatrix * viewMatrix * worldPosition;
         }
     `,
         fragmentShader: shaderCode,

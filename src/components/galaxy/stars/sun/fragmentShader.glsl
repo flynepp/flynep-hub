@@ -3,13 +3,11 @@ uniform vec3 bboxMin;
 uniform vec3 bboxSize;
 uniform float w;
 
-varying vec3 vPosition;
 varying vec3 vNormal;
+varying vec3 vWorldPos;
 
-float fresnel(vec3 viewDir, vec3 normal, float blend) {
-  // pow(1.0 - dot(viewDir, normal), 5.0) 产生边缘亮度
-  // mix(1.0, f, blend) 用于 Blender 的 blend 参数
-  return mix(1.0, pow(1.0 - dot(viewDir, normal), 5.0), blend);
+float fresnel(vec3 viewDir, vec3 normal, float IOR) {
+  return pow(1.0 - dot(viewDir, normalize(normal)), IOR);
 }
 
 vec3 colourRamp(float factor, float blackPos, float whitePos, vec3 blackColor,
@@ -118,7 +116,8 @@ float fbm4D(vec3 pos, float w, float detail, float roughness,
     if (float(i) >= detail)
       break;
 
-    float noiseVal = valueNoise4D(vec4(pos * frequency, w * frequency));
+    float noiseVal =
+        valueNoise4D(vec4(pos * frequency, w * frequency)) * 2.0 - 1.0;
     total += noiseVal * amplitude;
     maxValue += amplitude;
 
@@ -142,19 +141,58 @@ float noiseTextureFBM(vec3 coord, float w, float scale, float detail,
   return fbm4D(p, w, detail, roughness, lacunarity);
 }
 
-void main() {
-  vec3 normal = normalize(vNormal);
-  vec3 viewDir = normalize(cameraPos - vPosition);
+vec3 addColors(vec3 c1, vec3 c2, float clampFactor) {
+  vec3 result = c1 + c2;
+  // clampFactor: 0.0 表示不钳制，1.0 表示完全钳制，中间值线性插值
+  // 这里用 mix 来渐变地钳制结果
+  vec3 clamped = clamp(result, 0.0, 1.0);
+  return mix(result, clamped, clampFactor);
+}
 
-  float fresnelWeight = fresnel(viewDir, normal, 0.035);
-  vec3 colour = colourRamp(fresnelWeight, 0.0, 1.0, vec3(0.0, 0.0, 0.0),
-                           vec3(1.0, 1.0, 1.0));
+vec3 emissive(vec3 color, vec3 intensity) {
+  // 自发光
+  return color * intensity;
+}
+
+vec3 emissive(vec3 color, float intensity) {
+  // 自发光
+  return color * intensity;
+}
+
+void main() {
+  vec3 viewDir = normalize(cameraPos - vWorldPos);
+  vec3 normal = normalize(vNormal);
+
+  vec3 baseColour = vec3(1.0, 1.0, 0.0);
+
+  float fresnel = fresnel(viewDir, normal, 3.0);
+  vec3 colour = colourRamp(fresnel, 0.0, 1.0);
 
   vec3 result1 = colour * 0.5;
 
-  vec3 generatedCoord = getGeneratedCoord(vPosition);
+  vec3 generatedCoord = getGeneratedCoord(vWorldPos);
   vec3 mappingVector =
       pointMapping(generatedCoord, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 
-  gl_FragColor = vec4(colour, 1.0);
+  // 第1种纹理
+  float factor1 = noiseTextureFBM(mappingVector, w, 2.5, 10.0, 0.85, 2.0, 0.26);
+  vec3 colour1 = colourRamp(factor1, 0.523, 0.773);
+
+  // 第2种纹理
+  float factor2 = noiseTextureFBM(mappingVector, w, 30.0, 4.0, 0.6, 2.0, 0.26);
+  vec3 colour2 = colourRamp(factor1, 0.486, 1.0);
+
+  // 第3种纹理
+  float factor3 =
+      noiseTextureFBM(mappingVector, 0.0, 120.0, 2.0, 0.5, 2.0, 0.0);
+  vec3 colour3 = colourRamp(factor1, 0.514, 1.0);
+
+  vec3 colourMixed = addColors(colour2, colour3, 1.0);
+
+  vec3 colourRes = result1 + colour1 + colourMixed;
+  colourRes *= 20.0;
+
+  vec3 emission = emissive(baseColour, colour);
+
+  gl_FragColor = vec4(emission, 1.0);
 }
