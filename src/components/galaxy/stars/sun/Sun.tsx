@@ -63,10 +63,10 @@ export default function Sun() {
     sunMat.uniforms.w.value = elapsed * 0.01;
     sunMat.uniforms.cameraPos.value.copy(camera.position);
 
-    sunHaloMat.uniforms.w.value = elapsed * 0.005;
+    sunHaloMat.uniforms.w.value = elapsed * 0.001;
     sunHaloMat.uniforms.cameraPos.value.copy(camera.position);
 
-    const baseScale = 0.95;
+    const baseScale = 0.90;
     const amplitude = 0.05;
     const frequency = 0.005;
 

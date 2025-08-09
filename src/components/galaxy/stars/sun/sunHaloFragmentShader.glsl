@@ -243,7 +243,7 @@ void main() {
     vec3(1.0, 1.0, 1.0)
   );
 
-  float factor = noiseTextureFBM(mappingVector, w, 2.5, 15.0, 0.8, 3.0, 2.0);
+  float factor = noiseTextureFBM(mappingVector, w, 1.5, 15.0, 0.8, 3.0, 2.0);
   float whitePos = 1.0;
   float blackPos = 0.523;
   float t = clamp((factor - blackPos) / (whitePos - blackPos), 0.0, 1.0);

@@ -11,16 +11,6 @@ float fresnel(vec3 viewDir, vec3 normal, float IOR) {
   return pow(1.0 - dot(viewDir, normalize(normal)), IOR);
 }
 
-vec3 colourRamp(float factor, float blackPos, float whitePos, vec3 blackColor, vec3 whiteColor) {
-  float t = clamp((factor - blackPos) / (whitePos - blackPos), 0.0, 1.0);
-  return mix(blackColor, whiteColor, t);
-}
-
-vec3 colourRamp(float factor, float blackPos, float whitePos) {
-  float t = clamp((factor - blackPos) / (whitePos - blackPos), 0.0, 1.0);
-  return mix(vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0), t);
-}
-
 vec3 getGeneratedCoord(vec3 objectPosition) {
   return (objectPosition - bboxMin) / bboxSize;
 }
@@ -227,14 +217,6 @@ float noiseTextureFBM(
   return fbm4D(p, w, detail, roughness, lacunarity);
 }
 
-vec3 addColors(vec3 c1, vec3 c2, float clampFactor) {
-  vec3 result = c1 + c2;
-  // clampFactor: 0.0 表示不钳制，1.0 表示完全钳制，中间值线性插值
-  // 这里用 mix 来渐变地钳制结果
-  vec3 clamped = clamp(result, 0.0, 1.0);
-  return mix(result, clamped, clampFactor);
-}
-
 vec3 emissive(vec3 color, vec3 intensity) {
   // 自发光
   return color * intensity;
@@ -249,32 +231,31 @@ void main() {
   vec3 viewDir = normalize(cameraPos - vWorldPos);
   vec3 normal = normalize(vNormal);
 
+  float dp = dot(viewDir, normal);
+  if (dp < 0.0) {
+    discard;
+  }
+
   vec3 baseColour = vec3(0.8, 0.38, 0.24);
 
   float fresnel = fresnel(viewDir, normal, 3.0);
-  vec3 colour = colourRamp(fresnel, 0.0, 1.0);
-
-  vec3 result1 = colour * 0.5;
+  float fresnelIntensity = clamp((fresnel - 0.0) / (1.0 - 0.0), 0.0, 1.0);
+  float result1 = fresnelIntensity * 0.5;
 
   vec3 generatedCoord = getGeneratedCoord(vLocalPos);
   vec3 mappingVector = pointMapping(generatedCoord, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 
-  // 第1种纹理
   float factor1 = noiseTextureFBM(mappingVector, w, 2.5, 10.0, 0.85, 2.0, 0.26);
-  vec3 colour1 = colourRamp(factor1, 0.493, 0.773);
-
-  // 第2种纹理
   float factor2 = noiseTextureFBM(mappingVector, w, 10.0, 30.0, 0.5, 2.0, 0.06);
-  vec3 colour2 = colourRamp(factor2, 0.486, 1.0);
-
-  // 第3种纹理
   float factor3 = noiseTextureFBM(mappingVector, 0.0, 70.0, 2.0, 0.5, 2.0, 0.0);
-  vec3 colour3 = colourRamp(factor3, 0.4, 1.0, vec3(0.1, 0.1, 0.1), vec3(1.0, 1.0, 1.0));
 
-  vec3 colourMixed = addColors(colour2, colour3, 1.0);
+  factor1 = clamp((factor1 - 0.493) / (0.773 - 0.493), 0.0, 1.0);
+  factor2 = clamp((factor2 - 0.486) / (1.0 - 0.486), 0.0, 1.0);
+  factor3 = clamp((factor3 - 0.4) / (1.0 - 0.4), 0.0, 1.0);
 
-  vec3 colourRes = result1 + colour1 + colourMixed;
-  colourRes *= 4.0;
+  float mixed = factor2 + factor3; // 原来的 colourMixed
+  float colourRes = result1 + factor1 + mixed;
+  colourRes *= 4.0; // 放大
 
   vec3 emission = emissive(baseColour, colourRes);
 
