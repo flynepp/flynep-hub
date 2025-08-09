@@ -1,11 +1,15 @@
 import React, { Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { PerspectiveCamera, Text } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { PerspectiveCamera, Text, OrbitControls } from '@react-three/drei';
 import { camera } from './camera';
 import { particles, updateParticleFlicker } from './background';
+import { Axes } from '../helper/axesHelper';
+import * as earthData from './stars/earth/earthData';
+import * as sunData from './stars/sun/sunData';
 
 // 异步加载组件
 const LazySun = React.lazy(() => import('./stars/sun/Sun'));
+const LazyEarth = React.lazy(() => import('./stars/earth/earth'));
 
 // 闪烁动画组件
 const FlickerAnimation: React.FC = () => {
@@ -26,15 +30,15 @@ const LoadingPlaceholder: React.FC = () => (
 
 const GalaxyCanvas: React.FC = () => {
   return (
-    <Canvas style={{ background: '#000011' }}>
+    <Canvas style={{ background: '#030308' }}>
       <PerspectiveCamera
         makeDefault
         position={camera.position as [number, number, number]}
         fov={camera.fov}
         near={camera.near}
         far={camera.far}
-        onUpdate={self => self.lookAt(0, 0, 0)}
       />
+      <OrbitControls target={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
 
       {/* 闪烁动画 */}
       <FlickerAnimation />
@@ -42,17 +46,19 @@ const GalaxyCanvas: React.FC = () => {
       {/* 星空背景 */}
       <primitive object={particles} />
 
-      <axesHelper args={[20]} />
-      <Text position={[6, 1, 0]} fontSize={0.5} color="red">X</Text>
-      <Text position={[1, 6, 0]} fontSize={0.5} color="green">Y</Text>
-      <Text position={[1, 0, 6]} fontSize={0.5} color="blue">Z</Text>
+      <Axes position={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
 
       {/* 太阳 */}
       <Suspense fallback={<LoadingPlaceholder />}>
         <LazySun />
       </Suspense>
+
+      {/* 地球 */}
+      <Suspense fallback={<LoadingPlaceholder />}>
+        <LazyEarth position={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
+      </Suspense>
     </Canvas>
   );
 };
 
-export default GalaxyCanvas; 
+export default GalaxyCanvas;
