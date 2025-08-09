@@ -158,7 +158,6 @@ float fbm4D(vec3 pos, float w, float detail, float roughness, float lacunarity) 
   return total / maxValue;
 }
 
-// 然后你自己包装一个接口函数
 float noiseTextureFBM(
   vec3 coord,
   float w,
