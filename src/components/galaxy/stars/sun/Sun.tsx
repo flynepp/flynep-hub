@@ -2,7 +2,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
-import { sunGLBPath, sunHaloGLBPath, rotationPeriod } from './sunData';
+import { sunGLBPath, sunHaloGLBPath, rotationPeriod, scaleFactor } from './sunData';
 import { calcBoundingBox } from '../../../helper/helperFunction';
 import { createSunMaterial } from './sunMaterial';
 import { createSunHaloMaterial } from './sunHaloMaterial';
@@ -10,6 +10,8 @@ import { createSunHaloMaterial } from './sunHaloMaterial';
 export default function Sun() {
   const sunModel = useGLTF(sunGLBPath);
   const sunHaloModel = useGLTF(sunHaloGLBPath);
+  sunModel.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
+  sunHaloModel.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
   const [bboxMin, setBboxMin] = useState(new THREE.Vector3());
   const [bboxSize, setBboxSize] = useState(new THREE.Vector3());
@@ -31,9 +33,9 @@ export default function Sun() {
 
   useEffect(() => {
     if (sunHaloModel.scene) {
-      const { bboxMin, bboxSize } = calcBoundingBox(sunHaloModel);
-      setBboxMinHalo(bboxMin);
-      setBboxSizeHalo(bboxSize);
+      const { bboxMin: bboxMinHalo, bboxSize: bboxSizeHalo } = calcBoundingBox(sunHaloModel);
+      setBboxMinHalo(bboxMinHalo);
+      setBboxSizeHalo(bboxSizeHalo);
     }
   }, [sunHaloModel]);
 
@@ -66,11 +68,11 @@ export default function Sun() {
     sunHaloMat.uniforms.w.value = elapsed * 0.001;
     sunHaloMat.uniforms.cameraPos.value.copy(camera.position);
 
-    const baseScale = 0.90;
+    const baseScale = 0.9;
     const amplitude = 0.05;
     const frequency = 0.005;
 
-    const sc = baseScale + amplitude * Math.sin(elapsed * frequency * 2 * Math.PI);
+    const sc = (baseScale + amplitude * Math.sin(elapsed * frequency * 2 * Math.PI)) * scaleFactor;
 
     sunHaloModel.scene.scale.set(sc, sc, sc);
 
