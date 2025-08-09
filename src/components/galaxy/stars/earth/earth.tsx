@@ -4,7 +4,7 @@ import * as THREE from 'three/webgpu';
 import * as sun from '../sun/sunData';
 import { camera } from '../../camera';
 import { createGlobeMaterial } from './globeMaterial';
-import { rotationPeriod, tiltAngle } from './earthData';
+import { rotationPeriod, tiltAngle, dayTexturePath, nightTexturePath, bumpRoughnessCloudsTexturePath } from './earthData';
 
 export default function Earth({ position = [0, 0, 0] }) {
     const meshRef = useRef<THREE.Mesh>(null);
@@ -12,19 +12,19 @@ export default function Earth({ position = [0, 0, 0] }) {
     // 纹理加载
     const textureLoader = new THREE.TextureLoader();
     const dayTexture = textureLoader.load(
-        'src/components/galaxy/textures/planets/earth_day_4096.jpg'
+        dayTexturePath
     );
     dayTexture.colorSpace = THREE.SRGBColorSpace;
     dayTexture.anisotropy = 8;
 
     const nightTexture = textureLoader.load(
-        'src/components/galaxy/textures/planets/earth_night_4096.jpg'
+        nightTexturePath
     );
     nightTexture.colorSpace = THREE.SRGBColorSpace;
     nightTexture.anisotropy = 8;
 
     const bumpRoughnessCloudsTexture = textureLoader.load(
-        'src/components/galaxy/textures/planets/earth_bump_roughness_clouds_4096.jpg'
+        bumpRoughnessCloudsTexturePath
     );
     bumpRoughnessCloudsTexture.anisotropy = 8;
 
