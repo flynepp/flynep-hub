@@ -7,10 +7,13 @@ import react from '@astrojs/react';
 
 import cloudflare from '@astrojs/cloudflare';
 
+import sentry from '@sentry/astro';
+import spotlightjs from '@spotlightjs/astro';
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://example.com',
-  integrations: [mdx(), sitemap(), react()],
+  integrations: [mdx(), sitemap(), react(), sentry(), spotlightjs()],
 
   server: {
     host: '0.0.0.0',

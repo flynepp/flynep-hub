@@ -6,7 +6,7 @@ const colors = []; // 添加颜色数组
 
 for (let i = 0; i < 10000; i++) {
   // 生成球坐标：半径500-2000，随机角度
-  const radius = THREE.MathUtils.randFloat(500, 2000);
+  const radius = THREE.MathUtils.randFloat(1000, 3000);
   const theta = THREE.MathUtils.randFloat(0, Math.PI * 2); // 水平角
   const phi = THREE.MathUtils.randFloat(0, Math.PI); // 垂直角
 

@@ -1,5 +1,5 @@
 export const camera = {
-  position: [105, 2, 105],
+  position: [305, 2, 305],
   fov: 50,
   near: 0.1,
   far: 5000,

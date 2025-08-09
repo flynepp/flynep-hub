@@ -6,6 +6,7 @@ import { sunGLBPath, sunHaloGLBPath, rotationPeriod, scaleFactor } from './sunDa
 import { calcBoundingBox } from '../../../helper/helperFunction';
 import { createSunMaterial } from './sunMaterial';
 import { createSunHaloMaterial } from './sunHaloMaterial';
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 
 export default function Sun() {
   const sunModel = useGLTF(sunGLBPath);
@@ -116,6 +117,13 @@ export default function Sun() {
       <group ref={sunHaloRef}>
         <primitive object={sunHaloModel.scene} />
       </group>
+      <EffectComposer>
+        <Bloom
+          intensity={2.0}   // 光强
+          luminanceThreshold={0.4} // 触发发光的亮度阈值
+          luminanceSmoothing={0.5} // 平滑
+        />
+      </EffectComposer>
     </group>
   );
 }

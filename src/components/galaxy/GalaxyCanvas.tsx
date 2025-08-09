@@ -30,7 +30,7 @@ const LoadingPlaceholder: React.FC = () => (
 
 const GalaxyCanvas: React.FC = () => {
   return (
-    <Canvas style={{ background: '#00000F' }}>
+    <Canvas style={{ background: '#030308' }}>
       <PerspectiveCamera
         makeDefault
         position={camera.position as [number, number, number]}
@@ -46,17 +46,12 @@ const GalaxyCanvas: React.FC = () => {
       {/* 星空背景 */}
       <primitive object={particles} />
 
-      <Axes />
+      <Axes position={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
 
       {/* 太阳 */}
       <Suspense fallback={<LoadingPlaceholder />}>
         <LazySun />
       </Suspense>
-      <pointLight
-        position={[sunData.pos.x, sunData.pos.y, sunData.pos.z]}
-        intensity={100000}
-        color="#ffffff"
-      />
 
       {/* 地球 */}
       <Suspense fallback={<LoadingPlaceholder />}>
