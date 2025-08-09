@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import shaderCode from './sunHaloFragmentShader.glsl?raw';
 
 export function createSunHaloMaterial({ cameraPos, bboxMin, bboxSize, w }) {
-    return new THREE.ShaderMaterial({
-        vertexShader: `
+  return new THREE.ShaderMaterial({
+    vertexShader: `
         // 顶点着色器
         varying vec3 vNormal;
         varying vec3 vWorldPos;
@@ -22,15 +22,15 @@ export function createSunHaloMaterial({ cameraPos, bboxMin, bboxSize, w }) {
             gl_Position = projectionMatrix * viewMatrix * worldPosition;
         }
     `,
-        fragmentShader: shaderCode,
-        uniforms: {
-            cameraPos: { value: cameraPos || new THREE.Vector3() },
-            bboxMin: { value: bboxMin || new THREE.Vector3() },
-            bboxSize: { value: bboxSize || new THREE.Vector3() },
-            w: { value: w || 0.0 },
-        },
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.NormalBlending,
-    });
+    fragmentShader: shaderCode,
+    uniforms: {
+      cameraPos: { value: cameraPos || new THREE.Vector3() },
+      bboxMin: { value: bboxMin || new THREE.Vector3() },
+      bboxSize: { value: bboxSize || new THREE.Vector3() },
+      w: { value: w || 0.0 },
+    },
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.NormalBlending,
+  });
 }

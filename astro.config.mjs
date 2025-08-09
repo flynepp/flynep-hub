@@ -13,8 +13,8 @@ export default defineConfig({
   integrations: [mdx(), sitemap(), react()],
 
   server: {
-      host: '0.0.0.0',
-      port: 4321,
+    host: '0.0.0.0',
+    port: 4321,
   },
 
   adapter: cloudflare(),

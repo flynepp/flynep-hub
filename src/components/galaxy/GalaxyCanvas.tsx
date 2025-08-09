@@ -33,7 +33,7 @@ const GalaxyCanvas: React.FC = () => {
         fov={camera.fov}
         near={camera.near}
         far={camera.far}
-        onUpdate={self => self.lookAt(0, 0, 0)}
+        onUpdate={(self) => self.lookAt(0, 0, 0)}
       />
 
       {/* 闪烁动画 */}
@@ -43,9 +43,15 @@ const GalaxyCanvas: React.FC = () => {
       <primitive object={particles} />
 
       <axesHelper args={[20]} />
-      <Text position={[6, 1, 0]} fontSize={0.5} color="red">X</Text>
-      <Text position={[1, 6, 0]} fontSize={0.5} color="green">Y</Text>
-      <Text position={[1, 0, 6]} fontSize={0.5} color="blue">Z</Text>
+      <Text position={[6, 1, 0]} fontSize={0.5} color="red">
+        X
+      </Text>
+      <Text position={[1, 6, 0]} fontSize={0.5} color="green">
+        Y
+      </Text>
+      <Text position={[1, 0, 6]} fontSize={0.5} color="blue">
+        Z
+      </Text>
 
       {/* 太阳 */}
       <Suspense fallback={<LoadingPlaceholder />}>
@@ -55,4 +61,4 @@ const GalaxyCanvas: React.FC = () => {
   );
 };
 
-export default GalaxyCanvas; 
+export default GalaxyCanvas;

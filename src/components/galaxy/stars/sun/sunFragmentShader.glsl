@@ -11,8 +11,7 @@ float fresnel(vec3 viewDir, vec3 normal, float IOR) {
   return pow(1.0 - dot(viewDir, normalize(normal)), IOR);
 }
 
-vec3 colourRamp(float factor, float blackPos, float whitePos, vec3 blackColor,
-                vec3 whiteColor) {
+vec3 colourRamp(float factor, float blackPos, float whitePos, vec3 blackColor, vec3 whiteColor) {
   float t = clamp((factor - blackPos) / (whitePos - blackPos), 0.0, 1.0);
   return mix(blackColor, whiteColor, t);
 }
@@ -56,17 +55,29 @@ vec3 pointMapping(vec3 pos, vec3 translate, vec3 rotate, vec3 scale) {
   return translated;
 }
 
-vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec4 mod289(vec4 x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
 
-float mod289(float x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+float mod289(float x) {
+  return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
 
-vec4 permute(vec4 x) { return mod289(((x * 34.0) + 10.0) * x); }
+vec4 permute(vec4 x) {
+  return mod289((x * 34.0 + 10.0) * x);
+}
 
-float permute(float x) { return mod289(((x * 34.0) + 10.0) * x); }
+float permute(float x) {
+  return mod289((x * 34.0 + 10.0) * x);
+}
 
-vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+vec4 taylorInvSqrt(vec4 r) {
+  return 1.79284291400159 - 0.85373472095314 * r;
+}
 
-float taylorInvSqrt(float r) { return 1.79284291400159 - 0.85373472095314 * r; }
+float taylorInvSqrt(float r) {
+  return 1.79284291400159 - 0.85373472095314 * r;
+}
 
 vec4 grad4(float j, vec4 ip) {
   const vec4 ones = vec4(1.0, 1.0, 1.0, -1.0);
@@ -84,10 +95,12 @@ vec4 grad4(float j, vec4 ip) {
 #define F4 0.309016994374947451
 
 float snoise(vec4 v) {
-  const vec4 C = vec4(0.138196601125011,   // (5 - sqrt(5))/20  G4
-                      0.276393202250021,   // 2 * G4
-                      0.414589803375032,   // 3 * G4
-                      -0.447213595499958); // -1 + 4 * G4
+  const vec4 C = vec4(
+    0.138196601125011, // (5 - sqrt(5))/20  G4
+    0.276393202250021, // 2 * G4
+    0.414589803375032, // 3 * G4
+    -0.447213595499958
+  ); // -1 + 4 * G4
 
   // First corner
   vec4 i = floor(v + dot(v, vec4(F4)));
@@ -126,10 +139,15 @@ float snoise(vec4 v) {
   // Permutations
   i = mod289(i);
   float j0 = permute(permute(permute(permute(i.w) + i.z) + i.y) + i.x);
-  vec4 j1 = permute(permute(permute(permute(i.w + vec4(i1.w, i2.w, i3.w, 1.0)) +
-                                    i.z + vec4(i1.z, i2.z, i3.z, 1.0)) +
-                            i.y + vec4(i1.y, i2.y, i3.y, 1.0)) +
-                    i.x + vec4(i1.x, i2.x, i3.x, 1.0));
+  vec4 j1 = permute(
+    permute(
+      permute(permute(i.w + vec4(i1.w, i2.w, i3.w, 1.0)) + i.z + vec4(i1.z, i2.z, i3.z, 1.0)) +
+        i.y +
+        vec4(i1.y, i2.y, i3.y, 1.0)
+    ) +
+      i.x +
+      vec4(i1.x, i2.x, i3.x, 1.0)
+  );
 
   // Gradients: 7x7x6 points over a cube, mapped onto a 4-cross polytope
   // 7*7*6 = 294, which is close to the ring size 17*17 = 289.
@@ -142,8 +160,7 @@ float snoise(vec4 v) {
   vec4 p4 = grad4(j1.w, ip);
 
   // Normalise gradients
-  vec4 norm =
-      taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+  vec4 norm = taylorInvSqrt(vec4(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
   p0 *= norm.x;
   p1 *= norm.y;
   p2 *= norm.z;
@@ -155,12 +172,12 @@ float snoise(vec4 v) {
   vec2 m1 = max(0.6 - vec2(dot(x3, x3), dot(x4, x4)), 0.0);
   m0 = m0 * m0;
   m1 = m1 * m1;
-  return 49.0 * (dot(m0 * m0, vec3(dot(p0, x0), dot(p1, x1), dot(p2, x2))) +
-                 dot(m1 * m1, vec2(dot(p3, x3), dot(p4, x4))));
+  return 49.0 *
+  (dot(m0 * m0, vec3(dot(p0, x0), dot(p1, x1), dot(p2, x2))) +
+    dot(m1 * m1, vec2(dot(p3, x3), dot(p4, x4))));
 }
 
-float fbm4D(vec3 pos, float w, float detail, float roughness,
-            float lacunarity) {
+float fbm4D(vec3 pos, float w, float detail, float roughness, float lacunarity) {
   float total = 0.0;
   float amplitude = 1.0;
   float frequency = 1.0;
@@ -190,8 +207,15 @@ float fbm4D(vec3 pos, float w, float detail, float roughness,
 }
 
 // 然后你自己包装一个接口函数
-float noiseTextureFBM(vec3 coord, float w, float scale, float detail,
-                      float roughness, float lacunarity, float distortion) {
+float noiseTextureFBM(
+  vec3 coord,
+  float w,
+  float scale,
+  float detail,
+  float roughness,
+  float lacunarity,
+  float distortion
+) {
   vec3 p = coord * scale;
 
   if (distortion > 0.0) {
@@ -233,8 +257,7 @@ void main() {
   vec3 result1 = colour * 0.5;
 
   vec3 generatedCoord = getGeneratedCoord(vLocalPos);
-  vec3 mappingVector =
-      pointMapping(generatedCoord, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
+  vec3 mappingVector = pointMapping(generatedCoord, vec3(0, 0, 0), vec3(0, 0, 0), vec3(1, 1, 1));
 
   // 第1种纹理
   float factor1 = noiseTextureFBM(mappingVector, w, 2.5, 10.0, 0.85, 2.0, 0.26);
@@ -246,8 +269,7 @@ void main() {
 
   // 第3种纹理
   float factor3 = noiseTextureFBM(mappingVector, 0.0, 70.0, 2.0, 0.5, 2.0, 0.0);
-  vec3 colour3 =
-      colourRamp(factor3, 0.4, 1.0, vec3(0.1, 0.1, 0.1), vec3(1.0, 1.0, 1.0));
+  vec3 colour3 = colourRamp(factor3, 0.4, 1.0, vec3(0.1, 0.1, 0.1), vec3(1.0, 1.0, 1.0));
 
   vec3 colourMixed = addColors(colour2, colour3, 1.0);
 
