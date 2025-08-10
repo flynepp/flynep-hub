@@ -7,6 +7,12 @@ export function createGlobeMaterial({
   dayTexture,
   nightTexture,
   bumpRoughnessCloudsTexture,
+}: {
+  cameraPos: THREE.Vector3;
+  sunPos: THREE.Vector3;
+  dayTexture: THREE.Texture;
+  nightTexture: THREE.Texture;
+  bumpRoughnessCloudsTexture: THREE.Texture;
 }) {
   return new THREE.ShaderMaterial({
     vertexShader: `
@@ -37,5 +43,6 @@ export function createGlobeMaterial({
       bumpMap: { value: bumpRoughnessCloudsTexture },
     },
     transparent: true,
+    blending: THREE.NormalBlending,
   });
 }

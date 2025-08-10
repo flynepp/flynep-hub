@@ -16,7 +16,7 @@ void main() {
 
   // 让边缘（法线与视线夹角接近90°，即dp接近0）更明显
   // 用smoothstep做一个柔和的过渡，让中心部分透明，边缘渐变显色
-  float edgeFactor = smoothstep(0.0, 15.0, abs(dp));
+  float edgeFactor = smoothstep(0.0, 10.0, abs(dp));
 
   vec3 baseColour = vec3(r, g, b);
 

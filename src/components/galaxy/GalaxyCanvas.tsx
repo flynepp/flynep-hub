@@ -14,7 +14,7 @@ const LazyEarth = React.lazy(() => import('./stars/earth/earth'));
 // 闪烁动画组件
 const FlickerAnimation: React.FC = () => {
   useFrame((state) => {
-    updateParticleFlicker(state.clock.elapsedTime);
+    updateParticleFlicker(state.clock.elapsedTime * 0.1);
   });
 
   return null;
