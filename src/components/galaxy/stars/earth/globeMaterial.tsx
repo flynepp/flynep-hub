@@ -2,14 +2,20 @@ import * as THREE from 'three';
 import shaderCode from './globeMaterial.glsl?raw';
 
 export function createGlobeMaterial({
-    cameraPos,
-    sunPos,
-    dayTexture,
-    nightTexture,
-    bumpRoughnessCloudsTexture,
+  cameraPos,
+  sunPos,
+  dayTexture,
+  nightTexture,
+  bumpRoughnessCloudsTexture,
+}: {
+  cameraPos: THREE.Vector3;
+  sunPos: THREE.Vector3;
+  dayTexture: THREE.Texture;
+  nightTexture: THREE.Texture;
+  bumpRoughnessCloudsTexture: THREE.Texture;
 }) {
-    return new THREE.ShaderMaterial({
-        vertexShader: `
+  return new THREE.ShaderMaterial({
+    vertexShader: `
         // 顶点着色器
         varying vec3 vNormal;
         varying vec3 vWorldPos;
@@ -28,14 +34,15 @@ export function createGlobeMaterial({
             gl_Position = projectionMatrix * viewMatrix * worldPosition;
         }
     `,
-        fragmentShader: shaderCode,
-        uniforms: {
-            cameraPos: { value: cameraPos || new THREE.Vector3() },
-            sunPos: { value: sunPos || new THREE.Vector3() },
-            dayTexture: { value: dayTexture },
-            nightTexture: { value: nightTexture },
-            bumpMap: { value: bumpRoughnessCloudsTexture },
-        },
-        transparent: true,
-    });
+    fragmentShader: shaderCode,
+    uniforms: {
+      cameraPos: { value: cameraPos || new THREE.Vector3() },
+      sunPos: { value: sunPos || new THREE.Vector3() },
+      dayTexture: { value: dayTexture },
+      nightTexture: { value: nightTexture },
+      bumpMap: { value: bumpRoughnessCloudsTexture },
+    },
+    transparent: true,
+    blending: THREE.NormalBlending,
+  });
 }

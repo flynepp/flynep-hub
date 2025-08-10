@@ -6,9 +6,12 @@ import { sunGLBPath, sunHaloGLBPath, rotationPeriod, scaleFactor } from './sunDa
 import { calcBoundingBox } from '../../../helper/helperFunction';
 import { createSunMaterial } from './sunMaterial';
 import { createSunHaloMaterial } from './sunHaloMaterial';
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { OutlineModel } from '../../../helper/onHoverEffect3D/outlineMaterial';
 
 export default function Sun() {
+  const [hovered, setHovered] = useState(false);
+
   const sunModel = useGLTF(sunGLBPath);
   const sunHaloModel = useGLTF(sunHaloGLBPath);
   sunModel.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
@@ -20,8 +23,8 @@ export default function Sun() {
   const [bboxMinHalo, setBboxMinHalo] = useState(new THREE.Vector3());
   const [bboxSizeHalo, setBboxSizeHalo] = useState(new THREE.Vector3());
 
-  const sunCoreRef = useRef();
-  const sunHaloRef = useRef();
+  const sunCoreRef = useRef<THREE.Group>(null);
+  const sunHaloRef = useRef<THREE.Group>(null);
 
   // 计算包围盒
   useEffect(() => {
@@ -43,7 +46,7 @@ export default function Sun() {
   // 创建材质，每当bbox或cameraPos更新时重新创建
   const sunMat = useMemo(() => {
     return createSunMaterial({
-      cameraPos: new THREE.Vector3(), // 先给空，后面用useFrame更新
+      cameraPos: new THREE.Vector3(),
       bboxMin: bboxMin,
       bboxSize: bboxSize,
       w: 0,
@@ -52,7 +55,7 @@ export default function Sun() {
 
   const sunHaloMat = useMemo(() => {
     return createSunHaloMaterial({
-      cameraPos: new THREE.Vector3(), // 先给空，后面用useFrame更新
+      cameraPos: new THREE.Vector3(),
       bboxMin: bboxMinHalo,
       bboxSize: bboxSizeHalo,
       w: 0,
@@ -92,8 +95,8 @@ export default function Sun() {
   useEffect(() => {
     if (sunModel.scene) {
       sunModel.scene.traverse((child) => {
-        if (child.isMesh) {
-          child.material = sunMat;
+        if ((child as THREE.Mesh).isMesh) {
+          (child as THREE.Mesh).material = sunMat;
         }
       });
     }
@@ -102,24 +105,37 @@ export default function Sun() {
   useEffect(() => {
     if (sunHaloModel.scene) {
       sunHaloModel.scene.traverse((child) => {
-        if (child.isMesh) {
-          child.material = sunHaloMat;
+        if ((child as THREE.Mesh).isMesh) {
+          (child as THREE.Mesh).material = sunHaloMat;
         }
       });
     }
   }, [sunHaloModel, sunHaloMat]);
 
   return (
-    <group>
+    <group
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHovered(false);
+      }}
+    >
       <group ref={sunCoreRef}>
         <primitive object={sunModel.scene} />
       </group>
       <group ref={sunHaloRef}>
         <primitive object={sunHaloModel.scene} />
       </group>
+
+      {/* 叠加描边模型，hover 时显示 */}
+      {hovered && <OutlineModel model={sunModel.scene} size={5.0} />}
+
       <EffectComposer>
         <Bloom
-          intensity={2.0}   // 光强
+          intensity={2.0} // 光强
           luminanceThreshold={0.4} // 触发发光的亮度阈值
           luminanceSmoothing={0.5} // 平滑
         />
