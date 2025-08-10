@@ -23,8 +23,8 @@ export default function Sun() {
   const [bboxMinHalo, setBboxMinHalo] = useState(new THREE.Vector3());
   const [bboxSizeHalo, setBboxSizeHalo] = useState(new THREE.Vector3());
 
-  const sunCoreRef = useRef();
-  const sunHaloRef = useRef();
+  const sunCoreRef = useRef<THREE.Group>(null);
+  const sunHaloRef = useRef<THREE.Group>(null);
 
   // 计算包围盒
   useEffect(() => {
@@ -95,8 +95,8 @@ export default function Sun() {
   useEffect(() => {
     if (sunModel.scene) {
       sunModel.scene.traverse((child) => {
-        if (child.isMesh) {
-          child.material = sunMat;
+        if ((child as THREE.Mesh).isMesh) {
+          (child as THREE.Mesh).material = sunMat;
         }
       });
     }
@@ -105,8 +105,8 @@ export default function Sun() {
   useEffect(() => {
     if (sunHaloModel.scene) {
       sunHaloModel.scene.traverse((child) => {
-        if (child.isMesh) {
-          child.material = sunHaloMat;
+        if ((child as THREE.Mesh).isMesh) {
+          (child as THREE.Mesh).material = sunHaloMat;
         }
       });
     }

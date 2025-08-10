@@ -48,11 +48,10 @@ export default function Earth({ position = [0, 0, 0] }) {
 
   useEffect(() => {
     if (meshRef.current) {
+      meshRef.current.material = globeMaterial;
+      meshRef.current.material.needsUpdate = true;
+      meshRef.current.rotation.z = angle;
     }
-    meshRef.current.material = globeMaterial;
-    meshRef.current.material.needsUpdate = true;
-
-    meshRef.current.rotation.z = angle;
   }, [globeMaterial]);
 
   useFrame(({ clock }) => {

@@ -3,7 +3,7 @@ import shaderCode from './outlineMaterial.glsl?raw';
 import { useState, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 
-function createOutlineMaterial(cameraPos, r, g, b) {
+function createOutlineMaterial(cameraPos: THREE.Vector3, r: number, g: number, b: number) {
   return new THREE.ShaderMaterial({
     vertexShader: `
         // 顶点着色器
@@ -37,16 +37,22 @@ function createOutlineMaterial(cameraPos, r, g, b) {
   });
 }
 
-export function OutlineModel({ model, colour = [0.8, 0.0, 0.8], size = 10.0 }) {
-  const [outlineObject, setOutlineObject] = useState(null);
+interface OutlineModelProps {
+  model: THREE.Object3D;
+  colour?: [number, number, number];
+  size?: number;
+}
+
+export function OutlineModel({ model, colour = [0.8, 0.0, 0.8], size = 10.0 }: OutlineModelProps) {
+  const [outlineObject, setOutlineObject] = useState<THREE.Object3D | null>(null);
   const [r, g, b] = colour;
-  const outlineMat = useMemo(() => createOutlineMaterial(new THREE.Vector3(), r, g, b), []);
+  const outlineMat = useMemo(() => createOutlineMaterial(new THREE.Vector3(), r, g, b), [r, g, b]);
 
   useEffect(() => {
     if (model) {
       const clone = model.clone(true);
 
-      clone.traverse((child) => {
+      clone.traverse((child: any) => {
         if (child.isMesh) {
           child.material = outlineMat;
           child.scale.set(size, size, size);

@@ -1,7 +1,14 @@
 import * as THREE from 'three';
 import shaderCode from './sunFragmentShader.glsl?raw';
 
-export function createSunMaterial({ cameraPos, bboxMin, bboxSize, w }) {
+interface SunMaterialParams {
+  cameraPos?: THREE.Vector3;
+  bboxMin?: THREE.Vector3;
+  bboxSize?: THREE.Vector3;
+  w?: number;
+}
+
+export function createSunMaterial({ cameraPos, bboxMin, bboxSize, w }: SunMaterialParams) {
   return new THREE.ShaderMaterial({
     vertexShader: `
         // 顶点着色器
