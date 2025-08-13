@@ -11,7 +11,7 @@ import {
   dayTexturePath,
   nightTexturePath,
   bumpRoughnessCloudsTexturePath,
-  pos
+  pos,
 } from './earthData';
 import { OutlineModel } from '../../../helper/onHoverEffect3D/outlineMaterial';
 
@@ -89,7 +89,8 @@ export default function Earth({ position = [0, 0, 0] }) {
   });
 
   return (
-    <group ref={groupRef}
+    <group
+      ref={groupRef}
       position={position as [number, number, number]}
       rotation={[angle, 0, 0]}
       onPointerOver={(e) => {

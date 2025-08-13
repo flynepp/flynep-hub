@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import * as THREE from 'three';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { PerspectiveCamera, OrbitControls } from '@react-three/drei';
 import { camera } from './camera';
 import { particles, updateParticleFlicker } from './background';
@@ -24,22 +24,28 @@ const OrbitFocus: React.FC = () => {
   const controls = useRef<OrbitControls>(null);
 
   useFrame(() => {
+    const { x, y, z } = earthData.pos;
     if (controls.current) {
-      const { x, y, z } = sunData.pos;
-
-      controls.current.target.set(x, y, z);
+      controls.current.target.set(x, y, z); // 只更新目标
       controls.current.update();
     }
   });
 
-  return <OrbitControls ref={controls} />;
+  return <OrbitControls ref={controls} enablePan={false} />;
 };
 
 const Gravity: React.FC<{ earthRef: React.RefObject<THREE.Mesh> }> = ({ earthRef }) => {
   useFrame((state, delta) => {
     const ms = Number(delta.toFixed(4));
 
-    const next = nextPostion(new THREE.Vector3(earthData.pos.x, earthData.pos.y, earthData.pos.z), ms, earthData.speedVector);
+    const next = nextPostion(
+      new THREE.Vector3(sunData.pos.x, sunData.pos.y, sunData.pos.z),
+      new THREE.Vector3(earthData.pos.x, earthData.pos.y, earthData.pos.z),
+      ms,
+      earthData.speedVector,
+      sunData.mass,
+      earthData.mass
+    );
 
     earthData.pos.x = next.x;
     earthData.pos.y = next.y;
