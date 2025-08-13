@@ -131,7 +131,7 @@ export default function Sun() {
       </group>
 
       {/* 叠加描边模型，hover 时显示 */}
-      {hovered && <OutlineModel model={sunModel.scene} size={5.0} />}
+      {hovered && <OutlineModel model={sunModel.scene} />}
 
       <EffectComposer>
         <Bloom

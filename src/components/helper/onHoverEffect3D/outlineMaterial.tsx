@@ -3,7 +3,13 @@ import shaderCode from './outlineMaterial.glsl?raw';
 import { useState, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 
-function createOutlineMaterial(cameraPos: THREE.Vector3, r: number, g: number, b: number) {
+function createOutlineMaterial(
+  cameraPos: THREE.Vector3,
+  r: number,
+  g: number,
+  b: number,
+  solidLine: number
+) {
   return new THREE.ShaderMaterial({
     vertexShader: `
         // 顶点着色器
@@ -30,6 +36,7 @@ function createOutlineMaterial(cameraPos: THREE.Vector3, r: number, g: number, b
       r: { value: r },
       g: { value: g },
       b: { value: b },
+      solidLine: { value: solidLine },
     },
     side: THREE.BackSide,
     transparent: true,
@@ -41,12 +48,23 @@ interface OutlineModelProps {
   model: THREE.Object3D;
   colour?: [number, number, number];
   size?: number;
+  solid?: boolean;
 }
 
-export function OutlineModel({ model, colour = [0.8, 0.0, 0.8], size = 10.0 }: OutlineModelProps) {
+export function OutlineModel({
+  model,
+  colour = [0.8, 0.0, 0.8],
+  size = 1.2,
+  solid = true,
+}: OutlineModelProps) {
   const [outlineObject, setOutlineObject] = useState<THREE.Object3D | null>(null);
   const [r, g, b] = colour;
-  const outlineMat = useMemo(() => createOutlineMaterial(new THREE.Vector3(), r, g, b), [r, g, b]);
+  const solidLine = solid == true ? 1.0 : 0.0;
+
+  const outlineMat = useMemo(
+    () => createOutlineMaterial(new THREE.Vector3(), r, g, b, solidLine),
+    [r, g, b]
+  );
 
   useEffect(() => {
     if (model) {
@@ -80,6 +98,15 @@ export function OutlineModel({ model, colour = [0.8, 0.0, 0.8], size = 10.0 }: O
  *
  *
  * import { OutlineModel } from '../../../helper/onHoverEffect3D/outlineMaterial';
- *
+ *<group
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHovered(false);
+      }}
+    >
  *
  */

@@ -11,11 +11,16 @@ import {
   dayTexturePath,
   nightTexturePath,
   bumpRoughnessCloudsTexturePath,
+  pos
 } from './earthData';
+import { OutlineModel } from '../../../helper/onHoverEffect3D/outlineMaterial';
 
 export default function Earth({ position = [0, 0, 0] }) {
+  const [hovered, setHovered] = useState(false);
+
   const meshRef = useRef<THREE.Mesh>(null);
   const autoMeshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null!);
 
   // 纹理加载
   const textureLoader = new THREE.TextureLoader();
@@ -77,16 +82,32 @@ export default function Earth({ position = [0, 0, 0] }) {
       const rotationAngle = (elapsed / (rotationPeriod * 60)) * 2 * Math.PI;
       meshRef.current.rotation.y = rotationAngle / 2;
     }
+
+    if (groupRef.current) {
+      groupRef.current.position.set(pos.x, pos.y, pos.z);
+    }
   });
 
   return (
-    <group position={position as [number, number, number]} rotation={[angle, 0, 0]}>
+    <group ref={groupRef}
+      position={position as [number, number, number]}
+      rotation={[angle, 0, 0]}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation();
+        setHovered(false);
+      }}
+    >
       <mesh ref={meshRef}>
         <sphereGeometry args={[1, 64, 64]} />
       </mesh>
       <mesh ref={autoMeshRef}>
         <sphereGeometry args={[1.04, 64, 64]} />
       </mesh>
+      {hovered && <OutlineModel model={meshRef.current as THREE.Object3D} />}
     </group>
   );
 }

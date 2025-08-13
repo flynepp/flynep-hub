@@ -1,34 +1,61 @@
-import React, { Suspense } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { PerspectiveCamera, Text, OrbitControls } from '@react-three/drei';
+import React, { useRef } from 'react';
+import * as THREE from 'three';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { PerspectiveCamera, OrbitControls } from '@react-three/drei';
 import { camera } from './camera';
 import { particles, updateParticleFlicker } from './background';
 import { Axes } from '../helper/axesHelper';
+import nextPostion from './physics/gravity';
+
+import Sun from './stars/sun/Sun';
+import Earth from './stars/earth/earth';
 import * as earthData from './stars/earth/earthData';
 import * as sunData from './stars/sun/sunData';
 
-// 异步加载组件
-const LazySun = React.lazy(() => import('./stars/sun/Sun'));
-const LazyEarth = React.lazy(() => import('./stars/earth/earth'));
-
-// 闪烁动画组件
+// 闪烁动画
 const FlickerAnimation: React.FC = () => {
   useFrame((state) => {
     updateParticleFlicker(state.clock.elapsedTime * 0.1);
   });
-
   return null;
 };
 
-// 加载占位符
-const LoadingPlaceholder: React.FC = () => (
-  <mesh>
-    <boxGeometry args={[1, 1, 1]} />
-    <meshBasicMaterial color="#666666" />
-  </mesh>
-);
+const OrbitFocus: React.FC = () => {
+  const controls = useRef<OrbitControls>(null);
+
+  useFrame(() => {
+    if (controls.current) {
+      const { x, y, z } = sunData.pos;
+
+      controls.current.target.set(x, y, z);
+      controls.current.update();
+    }
+  });
+
+  return <OrbitControls ref={controls} />;
+};
+
+const Gravity: React.FC<{ earthRef: React.RefObject<THREE.Mesh> }> = ({ earthRef }) => {
+  useFrame((state, delta) => {
+    const ms = Number(delta.toFixed(4));
+
+    const next = nextPostion(new THREE.Vector3(earthData.pos.x, earthData.pos.y, earthData.pos.z), ms, earthData.speedVector);
+
+    earthData.pos.x = next.x;
+    earthData.pos.y = next.y;
+    earthData.pos.z = next.z;
+
+    // 直接更新 mesh 位置
+    if (earthRef.current) {
+      earthRef.current.position.set(earthData.pos.x, earthData.pos.y, earthData.pos.z);
+    }
+  });
+  return null;
+};
 
 const GalaxyCanvas: React.FC = () => {
+  const earthRef = React.useRef<THREE.Mesh>(null!);
+
   return (
     <Canvas style={{ background: '#030308' }}>
       <PerspectiveCamera
@@ -38,25 +65,17 @@ const GalaxyCanvas: React.FC = () => {
         near={camera.near}
         far={camera.far}
       />
-      <OrbitControls target={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
+      <OrbitFocus />
 
-      {/* 闪烁动画 */}
       <FlickerAnimation />
-
-      {/* 星空背景 */}
       <primitive object={particles} />
 
       <Axes position={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
 
-      {/* 太阳 */}
-      <Suspense fallback={<LoadingPlaceholder />}>
-        <LazySun />
-      </Suspense>
+      <Sun />
+      <Earth position={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
 
-      {/* 地球 */}
-      <Suspense fallback={<LoadingPlaceholder />}>
-        <LazyEarth position={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
-      </Suspense>
+      <Gravity earthRef={earthRef} />
     </Canvas>
   );
 };
