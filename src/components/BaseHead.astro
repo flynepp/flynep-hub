@@ -13,6 +13,8 @@ interface Props {
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
+
+const env = import.meta.env.ENVIRONMENT;
 ---
 
 <!-- Global Metadata -->
@@ -54,4 +56,6 @@ const { title, description, image = '/blog-placeholder-1.jpg' } = Astro.props;
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
 
-<script src="./helper/getSouceIP.ts"></script>
+{env === 'prod' && (
+  <script src="./helper/getSouceIP.ts"></script>
+)}

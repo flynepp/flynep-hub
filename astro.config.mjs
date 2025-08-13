@@ -31,5 +31,8 @@ export default defineConfig({
           }
         : {},
     },
+    define: {
+      'import.meta.env.ENVIRONMENT': JSON.stringify('dev'),
+    },
   },
 });
