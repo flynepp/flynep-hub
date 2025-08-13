@@ -11,6 +11,7 @@ import {
   dayTexturePath,
   nightTexturePath,
   bumpRoughnessCloudsTexturePath,
+  pos
 } from './earthData';
 import { OutlineModel } from '../../../helper/onHoverEffect3D/outlineMaterial';
 
@@ -19,6 +20,7 @@ export default function Earth({ position = [0, 0, 0] }) {
 
   const meshRef = useRef<THREE.Mesh>(null);
   const autoMeshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null!);
 
   // 纹理加载
   const textureLoader = new THREE.TextureLoader();
@@ -80,10 +82,14 @@ export default function Earth({ position = [0, 0, 0] }) {
       const rotationAngle = (elapsed / (rotationPeriod * 60)) * 2 * Math.PI;
       meshRef.current.rotation.y = rotationAngle / 2;
     }
+
+    if (groupRef.current) {
+      groupRef.current.position.set(pos.x, pos.y, pos.z);
+    }
   });
 
   return (
-    <group
+    <group ref={groupRef}
       position={position as [number, number, number]}
       rotation={[angle, 0, 0]}
       onPointerOver={(e) => {
