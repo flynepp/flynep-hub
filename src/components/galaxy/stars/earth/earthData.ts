@@ -8,7 +8,7 @@ const bumpRoughnessCloudsTexturePath =
   '/galaxy/textures/planets/earth_bump_roughness_clouds_4096.jpg';
 const nightTexturePath = '/galaxy/textures/planets/earth_night_4096.jpg';
 const mass = 1;
-const speedVector = new THREE.Vector3(0, 0, -0.05);
+const speedVector = new THREE.Vector3(0, 0, -10.47198);
 
 export {
   rotationPeriod,
