@@ -5,7 +5,7 @@ import { PerspectiveCamera, OrbitControls } from '@react-three/drei';
 import { camera } from './camera';
 import { particles, updateParticleFlicker } from './background';
 import { Axes } from '../helper/axesHelper';
-import nextPostion from './physics/gravity';
+import nextPosition from './physics/gravity';
 
 import Sun from './stars/sun/Sun';
 import Earth from './stars/earth/earth';
@@ -24,7 +24,7 @@ const OrbitFocus: React.FC = () => {
   const controls = useRef<OrbitControls>(null);
 
   useFrame(() => {
-    const { x, y, z } = earthData.pos;
+    const { x, y, z } = sunData.pos;
     if (controls.current) {
       controls.current.target.set(x, y, z); // 只更新目标
       controls.current.update();
@@ -36,20 +36,22 @@ const OrbitFocus: React.FC = () => {
 
 const Gravity: React.FC<{ earthRef: React.RefObject<THREE.Mesh> }> = ({ earthRef }) => {
   useFrame((state, delta) => {
-    const ms = Number(delta.toFixed(4));
-
-    const next = nextPostion(
+    const { pos, speed } = nextPosition(
       new THREE.Vector3(sunData.pos.x, sunData.pos.y, sunData.pos.z),
       new THREE.Vector3(earthData.pos.x, earthData.pos.y, earthData.pos.z),
-      ms,
+      delta, // 直接用秒
       earthData.speedVector,
       sunData.mass,
       earthData.mass
     );
 
-    earthData.pos.x = next.x;
-    earthData.pos.y = next.y;
-    earthData.pos.z = next.z;
+    earthData.pos.x = pos.x;
+    earthData.pos.y = pos.y;
+    earthData.pos.z = pos.z;
+
+    earthData.speedVector.x = speed.x;
+    earthData.speedVector.y = speed.y;
+    earthData.speedVector.z = speed.z;
 
     // 直接更新 mesh 位置
     if (earthRef.current) {
@@ -76,7 +78,7 @@ const GalaxyCanvas: React.FC = () => {
       <FlickerAnimation />
       <primitive object={particles} />
 
-      <Axes position={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
+      <Axes position={[sunData.pos.x, sunData.pos.y, sunData.pos.z]} />
 
       <Sun />
       <Earth position={[earthData.pos.x, earthData.pos.y, earthData.pos.z]} />
