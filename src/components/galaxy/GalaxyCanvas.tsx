@@ -24,7 +24,7 @@ const OrbitFocus: React.FC = () => {
   const controls = useRef<OrbitControls>(null);
 
   useFrame(() => {
-    const { x, y, z } = sunData.pos;
+    const { x, y, z } = earthData.pos;
     if (controls.current) {
       controls.current.target.set(x, y, z); // 只更新目标
       controls.current.update();
@@ -41,8 +41,7 @@ const Gravity: React.FC<{ earthRef: React.RefObject<THREE.Mesh> }> = ({ earthRef
       new THREE.Vector3(earthData.pos.x, earthData.pos.y, earthData.pos.z),
       delta, // 直接用秒
       earthData.speedVector,
-      sunData.mass,
-      earthData.mass
+      sunData.mass
     );
 
     earthData.pos.x = pos.x;
