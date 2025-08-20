@@ -62,7 +62,7 @@ export class Panel3D {
         if (this.canvas.width < newCanvasWidth || this.canvas.height < newCanvasHeight) {
             this.canvas.width = newCanvasWidth;
             this.canvas.height = newCanvasHeight;
-            // 重新创建纹理
+
             this.texture.dispose();
             this.texture = new THREE.CanvasTexture(this.canvas);
             this.panelMesh.material.map = this.texture;
@@ -91,10 +91,9 @@ export class Panel3D {
         // ---------- 缩放 PlaneMesh ----------
         const vFOV = camera.fov * (Math.PI / 180); // 转弧度
         const distance = camera.position.distanceTo(new THREE.Vector3(pos.x, pos.y, pos.z));
-        const screenHeight = 2 * Math.tan(vFOV / 2) * distance; // 当前距离对应视口高度
-        const scaleY = screenHeight * 0.03; // 面板占屏幕高度比例，比如 10%
+        const screenHeight = 2 * Math.tan(vFOV / 2) * distance;
         const aspect = this.canvas.width / this.canvas.height;
-        const scale = scaleY * aspect; // 按纵横比计算宽度
+        const scale = screenHeight * 0.03 * aspect;
         this.panelMesh.scale.set(scale, scale, 1);
 
         // ---------- 平滑位置 ----------

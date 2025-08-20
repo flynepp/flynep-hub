@@ -102,7 +102,6 @@ export default function Earth({ position = [0, 0, 0] }) {
   });
 
   useFrame(() => {
-    // 每秒或者坐标变化时更新文字
     const earPos = new THREE.Vector3(pos.x, pos.y, pos.z);
 
     panel.update(
@@ -111,16 +110,12 @@ export default function Earth({ position = [0, 0, 0] }) {
       pos
     );
 
-    // 可选：让面板始终朝向相机
     if (panel.group) {
-      // 1. 计算相机在水平面上的位置
       const target = camera.position.clone();
-      target.y = panel.group.position.y; // 保持面板 y 不变
+      target.y = panel.group.position.y;
 
-      // 2. 面板朝向目标
       panel.group.lookAt(target);
 
-      // 3. 确保 up 向量是世界 y 轴
       panel.group.up.set(0, 1, 0);
     }
   });
