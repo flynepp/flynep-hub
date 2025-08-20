@@ -2,7 +2,6 @@ import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three/webgpu';
 import * as sun from '../sun/sunData';
-import { camera } from '../../camera';
 import { createGlobeMaterial } from './globeMaterial';
 import { createAtmosphereMaterial } from './atmosphereMaterial';
 import {
@@ -12,8 +11,10 @@ import {
   nightTexturePath,
   bumpRoughnessCloudsTexturePath,
   pos,
+  r
 } from './earthData';
 import { OutlineModel } from '../../../helper/onHoverEffect3D/outlineMaterial';
+import { Panel3D } from '../../../helper/panel';
 
 export default function Earth({ position = [0, 0, 0] }) {
   const [hovered, setHovered] = useState(false);
@@ -21,6 +22,8 @@ export default function Earth({ position = [0, 0, 0] }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const autoMeshRef = useRef<THREE.Mesh>(null);
   const groupRef = useRef<THREE.Group>(null!);
+
+  const panel = useMemo(() => new Panel3D({ x: 0, y: 0, z: 0 }), []);
 
   // 纹理加载
   const textureLoader = new THREE.TextureLoader();
@@ -86,6 +89,40 @@ export default function Earth({ position = [0, 0, 0] }) {
     if (groupRef.current) {
       groupRef.current.position.set(pos.x, pos.y, pos.z);
     }
+
+    const earPos = new THREE.Vector3(pos.x, pos.y, pos.z);
+    const distance = earPos.distanceTo(sunPos);
+    const offset = distance - r;
+
+    if (Math.abs(offset) > 1) {
+      const dir = earPos.clone().normalize();
+      const targetPos = earPos.clone().add(dir.multiplyScalar(-offset));
+      groupRef.current.position.lerp(targetPos, 0.1);
+    }
+  });
+
+  useFrame(() => {
+    // 每秒或者坐标变化时更新文字
+    const earPos = new THREE.Vector3(pos.x, pos.y, pos.z);
+
+    panel.update(
+      { x: pos.x, y: pos.y, z: pos.z, distance: earPos.distanceTo(sunPos) },
+      camera,
+      pos
+    );
+
+    // 可选：让面板始终朝向相机
+    if (panel.group) {
+      // 1. 计算相机在水平面上的位置
+      const target = camera.position.clone();
+      target.y = panel.group.position.y; // 保持面板 y 不变
+
+      // 2. 面板朝向目标
+      panel.group.lookAt(target);
+
+      // 3. 确保 up 向量是世界 y 轴
+      panel.group.up.set(0, 1, 0);
+    }
   });
 
   return (
@@ -109,6 +146,8 @@ export default function Earth({ position = [0, 0, 0] }) {
         <sphereGeometry args={[1.04, 64, 64]} />
       </mesh>
       {hovered && <OutlineModel model={meshRef.current as THREE.Object3D} />}
-    </group>
+
+      <primitive object={panel.group} />
+    </group >
   );
 }
