@@ -16,7 +16,7 @@ export default function nextPosition(
   speedVector: { x: number; y: number; z: number },
   sourceM: number
 ) {
-  const G = 3.2899; // 你之前的引力常数
+  const G = 3.2899; 
 
   const calcAccel = (pos: { x: number; y: number; z: number }) => {
     const dx = sourcePos.x - pos.x;
@@ -24,7 +24,7 @@ export default function nextPosition(
     const dz = sourcePos.z - pos.z;
     const r2 = dx * dx + dy * dy + dz * dz;
     const r = Math.sqrt(r2);
-    const factor = (G * sourceM) / (r2 * r); // GM / r^3
+    const factor = (G * sourceM) / (r2 * r);
     return {
       x: dx * factor,
       y: dy * factor,
